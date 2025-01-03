@@ -10,6 +10,9 @@ const HomeScreen = () => {
   const handleLogin = () =>{
     navigation.navigate("LOGIN");
   }
+  const handleRegister = () =>{
+    navigation.navigate("REGISTER");
+  }
   return (
     <View style={styles.container}>
       <Image source={require("../assets/logo.png")} style={styles.logo}/>
@@ -27,7 +30,7 @@ const HomeScreen = () => {
         >
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.loginButtonWrapper]}>
+        <TouchableOpacity style={[styles.loginButtonWrapper]} onPress={handleRegister}>
           <Text style={styles.registerButtonText}>Register</Text>
         </TouchableOpacity>
       
@@ -61,7 +64,7 @@ const styles = StyleSheet.create({
     subTitle: {
       fontSize: 18,
       textAlign: "center",
-      color: colors.gray,
+      color: colors.secondary,
       fontFamily: fonts.Medium,
       marginVertical: 20,
     },
