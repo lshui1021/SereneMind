@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "53557287631",
+    "firebase_url": "https://serenemind-88e4f-default-rtdb.firebaseio.com",
+    "project_id": "serenemind-88e4f",
+    "storage_bucket": "serenemind-88e4f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:53557287631:android:0bb70984c6d8cc405ef5ba",
+        "android_client_info": {
+          "package_name": "com.serenemind"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "53557287631-ctq86ctt98p5929d1fp9uniopdlgs4qi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6vSgBBSf3aplMUoqMFthj2y2Bjtz0udU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "53557287631-ctq86ctt98p5929d1fp9uniopdlgs4qi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,21 +1,42 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View, TextInput, Alert } from 'react-native';
 import { colors } from '../utils/color';
 import { fonts } from '../utils/fonts';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
+import auth from "@react-native-firebase/auth";
+
 
 const LoginScreen = () => {
-    const [secureEntery, setSecureEntery] = useState(true);
-    const navigation = useNavigation()
+  const [secureEntery, setSecureEntery] = useState(true);
 
-    const handleGoBack = () =>{
-        navigation.navigate("HOME");
+  const [email, SetEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const loginWithEmailAndPassword = () =>{
+    auth().signInWithEmailAndPassword(email,password)
+    .then((res) => {
+      console.log(res);
+      setTimeout(() => {
+        Alert.alert("Login Successful", "Welcome back to the app!");
+        navigation.navigate("DIARY"); // 導向 DiaryScreen
+      }, 0); // 延遲執行，避免與 Activity 的連接問題
+    })
+    .catch(err => {
+      console.log(err)
+      if (err.code === "auth/invalid-credential") {
+        Alert.alert("Login Error", "The email or password entered incorrectly.")
       }
-      const handleRegister = () => {
-        navigation.navigate("REGISTER");
-      };
+    })
+  };
+
+  const navigation = useNavigation();
+
+  const handleGoBack = () => { navigation.navigate("HOME")};
+  const handleRegister = () => { navigation.navigate("REGISTER")};
+  const handleDiary = () => { navigation.navigate("DIARY")};
+  
   return (
 
     <View style={styles.container}>
@@ -35,6 +56,8 @@ const LoginScreen = () => {
         <View style={styles.inputContainer}>
           <MaterialIcons name={"mail-outline"} size={30} color={colors.secondary}/>
             <TextInput
+              value={email}
+              onChangeText={text => SetEmail(text)}
               style={styles.textInput}
               placeholder="Enter your Email"
               placeholderTextColor={colors.secondary}
@@ -43,6 +66,8 @@ const LoginScreen = () => {
         <View style={styles.inputContainer}>
           <MaterialIcons name={"lock-outline"} size={30} color={colors.secondary}/>
           <TextInput
+            value={password}
+            onChangeText={text => setPassword(text)}
             style={styles.textInput}
             placeholder="Enter your password"
             placeholderTextColor={colors.secondary}
@@ -60,7 +85,7 @@ const LoginScreen = () => {
         <TouchableOpacity>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginButtonWrapper}>
+        <TouchableOpacity style={styles.loginButtonWrapper} onPress={loginWithEmailAndPassword}>
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
         <Text style={styles.continueText}>or continue with</Text>
