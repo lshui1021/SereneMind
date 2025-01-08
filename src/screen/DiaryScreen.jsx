@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Text,
   View,
@@ -8,12 +8,24 @@ import {
   Alert,
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import auth from "@react-native-firebase/auth";
-
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { Swipeable } from "react-native-gesture-handler";
 
 const DiaryScreen = () => {
   const [diaries, setDiaries] = useState([]);
   const navigation = useNavigation();
+  const db = getFirestore(); // Initialize Firestore
+  const auth = getAuth(); // Initialize Firebase Auth
 
   useFocusEffect(
     useCallback(() => {
@@ -23,19 +35,23 @@ const DiaryScreen = () => {
 
   const fetchDiaries = async () => {
     try {
-      const user = auth().currentUser;
+      const user = auth.currentUser;
       if (!user) {
-        Alert.alert("Error", "User not logged in.");
+        //Alert.alert("Error", "User not logged in.");
         return;
       }
 
-      const snapshot = await firestore()
-        .collection("diaries")
-        .where("userId", "==", user.uid)
-        .orderBy("createdAt", "desc")
-        .get();
-
-      const fetchedDiaries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Query the diaries collection
+      const q = query(
+        collection(db, "diaries"),
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+      const snapshot = await getDocs(q);
+      const fetchedDiaries = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setDiaries(fetchedDiaries);
     } catch (error) {
       console.error("Error fetching diaries: ", error);
@@ -54,9 +70,10 @@ const DiaryScreen = () => {
           style: "destructive",
           onPress: async () => {
             try {
-              await firestore().collection("diaries").doc(id).delete();
+              // Use deleteDoc with modular API
+              await deleteDoc(doc(db, "diaries", id));
               Alert.alert("Success", "Diary deleted successfully!");
-              fetchDiaries();
+              fetchDiaries(); // Refresh the diaries list
             } catch (error) {
               console.error("Error deleting diary: ", error);
               Alert.alert("Error", "Failed to delete diary.");
@@ -89,14 +106,20 @@ const DiaryScreen = () => {
     >
       <View style={styles.diaryItem}>
         <View style={styles.diaryHeader}>
-          <Text style={styles.date}>{item.createdAt?.toDate().toISOString().split("T")[0]}</Text>
+          <Text style={styles.date}>
+            {item.createdAt?.toDate
+              ? item.createdAt.toDate().toISOString().split("T")[0]
+              : "Unknown Date"}
+          </Text>
           <View style={styles.moodBubble}>
             <Text style={styles.moodText}>{item.mood}</Text>
           </View>
         </View>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.content}>
-          {item.content.length > 100 ? `${item.content.slice(0, 100)}...` : item.content}
+          {item.content.length > 100
+            ? `${item.content.slice(0, 100)}...`
+            : item.content}
         </Text>
         <View style={styles.buttonRow}>
           <TouchableOpacity
@@ -129,7 +152,8 @@ const DiaryScreen = () => {
         keyExtractor={(item) => item.id}
         renderItem={renderDiary}
         ListHeaderComponent={<Text style={styles.header}>My Diaries</Text>}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={diaries.length === 0 && styles.emptyList}
+        ListEmptyComponent={<Text style={styles.emptyText}>No diaries found.</Text>}
       />
       <TouchableOpacity
         style={styles.addButton}
@@ -140,6 +164,7 @@ const DiaryScreen = () => {
     </View>
   );
 };
+
 export default DiaryScreen;
 
 const styles = StyleSheet.create({

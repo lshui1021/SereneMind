@@ -1,20 +1,26 @@
 import React, { useState } from "react";
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View, TextInput } from 'react-native';
-import { colors } from '../utils/color';
-import { fonts } from '../utils/fonts';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, TextInput, ScrollView } from "react-native";
+import { colors } from "../utils/color";
+import { fonts } from "../utils/fonts";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { useNavigation } from "@react-navigation/native";
-import auth from '@react-native-firebase/auth';
+import auth from "@react-native-firebase/auth";
 
-const RegisterScreen = ({}) => {
+const RegisterScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [secureEntry, setSecureEntry] = useState(true);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
 
   const onSignup = () => {
+    if (!isTermsAccepted) {
+      Alert.alert("Error", "You must agree to the terms and conditions to register.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match!");
       return;
@@ -27,9 +33,6 @@ const RegisterScreen = ({}) => {
         Alert.alert("Success", "Account created successfully!");
       })
       .catch((error) => {
-        if(error.code == "auth/invalid-credential"){
-          Alert.alert("Error", "Email or password entered incorrectly");
-        }
         if (error.code === "auth/email-already-in-use") {
           Alert.alert("Error", "That email address is already in use!");
         } else if (error.code === "auth/invalid-email") {
@@ -51,7 +54,7 @@ const RegisterScreen = ({}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity style={styles.backButtonWrapper} onPress={handleGoBack}>
         <MaterialIcons name={"keyboard-arrow-left"} color={colors.primary} size={40} />
       </TouchableOpacity>
@@ -117,14 +120,35 @@ const RegisterScreen = ({}) => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.loginButtonWrapper} onPress={onSignup}>
-          <Text style={styles.loginText}>Register</Text>
-        </TouchableOpacity>
-        <Text style={styles.continueText}>or continue with</Text>
+        {/* Terms and Conditions */}
+        <View style={styles.termsContainer}>
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setIsTermsAccepted((prev) => !prev)}
+          >
+            <View
+              style={[
+                styles.checkboxInner,
+                { backgroundColor: isTermsAccepted ? colors.primary : colors.white },
+              ]}
+            />
+          </TouchableOpacity>
+          <Text style={styles.termsText}>
+            I agree to the{" "}
+            <Text
+              style={styles.linkText}
+              onPress={() => navigation.navigate("POLICY")} // 或 openPrivacyPolicy()
+            >
+              Terms and Conditions
+            </Text>
+          </Text>
+        </View>
 
-        <TouchableOpacity style={styles.googleButtonContainer}>
-          <Image source={require("../assets/google.png")} style={styles.googleImage} />
-          <Text style={styles.googleText}>Google</Text>
+        <TouchableOpacity
+          style={[styles.loginButtonWrapper, !isTermsAccepted && styles.disabledButton]}
+          onPress={onSignup}
+        >
+          <Text style={styles.loginText}>Register</Text>
         </TouchableOpacity>
 
         <View style={styles.footerContainer}>
@@ -134,7 +158,7 @@ const RegisterScreen = ({}) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -142,9 +166,9 @@ export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: colors.lightpink,
-    padding: 20
+    padding: 20,
   },
   backButtonWrapper: {
     height: 50,
@@ -160,7 +184,7 @@ const styles = StyleSheet.create({
   headingText: {
     fontSize: 30,
     color: colors.primary,
-    fontFamily: fonts.SemiBold
+    fontFamily: fonts.SemiBold,
   },
   formContainer: {
     marginTop: 20,
@@ -180,13 +204,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontFamily: fonts.Light,
     fontSize: 15,
-    color: colors.primary
-  },
-  forgotPasswordText: {
-    textAlign: "right",
     color: colors.primary,
-    fontFamily: fonts.SemiBold,
+  },
+  termsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 10,
+  },
+  checkbox: {
+    height: 20,
+    width: 20,
+    borderWidth: 1,
+    borderColor: colors.secondary,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxInner: {
+    height: 14,
+    width: 14,
+  },
+  termsText: {
+    fontSize: 14,
+    color: colors.primary,
+  },
+  linkText: {
+    fontSize: 14,
+    color: colors.primary,
+    textDecorationLine: "underline",
   },
   loginButtonWrapper: {
     backgroundColor: colors.primary,
@@ -200,37 +245,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: 10,
   },
-  continueText: {
-    textAlign: "center",
-    marginVertical: 20,
-    fontSize: 14,
-    fontFamily: fonts.Regular,
-    color: colors.primary,
-  },
-  googleButtonContainer: {
-    flexDirection: "row",
-    borderWidth: 2,
-    borderColor: colors.primary,
-    borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
-    gap: 10,
-  },
-  googleImage: {
-    height: 30,
-    width: 30,
-  },
-  googleText: {
-    fontSize: 20,
-    fontFamily: fonts.SemiBold,
-  },
   footerContainer: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
     marginVertical: 20,
-    gap: 5,
   },
   accountText: {
     color: colors.primary,
@@ -239,5 +258,8 @@ const styles = StyleSheet.create({
   signupText: {
     color: colors.primary,
     fontFamily: fonts.Bold,
-  }
+  },
+  disabledButton: {
+    backgroundColor: colors.gray,
+  },
 });

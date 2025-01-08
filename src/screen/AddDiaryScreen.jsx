@@ -4,7 +4,22 @@ import { colors } from '../utils/color';
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { firebase } from '../firebase/config'; // Assuming firebase is configured in this path
+import { getFirestore, collection, query, where, orderBy, getDocs, deleteDoc, doc, addDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import { db } from "../config/firebase";
+
+const testFirestore = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "diaries"));
+    querySnapshot.forEach((doc) => {
+      console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
+    });
+  } catch (error) {
+    console.error("Error fetching diaries:", error);
+  }
+};
+
+testFirestore();
 
 const AddDiaryScreen = () => {
   const navigation = useNavigation();
@@ -33,26 +48,24 @@ const AddDiaryScreen = () => {
     }
 
     try {
-      const formattedDate = date.toISOString().split("T")[0]; // Format the date to yyyy-mm-dd
-
-      // Firebase - Add diary to Firestore
-      await firebase.firestore().collection("diaries").add({
+      const formattedDate = date.toISOString().split("T")[0];
+      const docRef = await addDoc(collection(db, "diaries"), {
         title,
         content,
         mood,
         created_at: formattedDate,
-        analysis_result: "", // Add analysis result if required
+        analysis_result: "",
       });
-
+      console.log("Document added with ID:", docRef.id);
       Alert.alert("Success", "Diary added successfully!");
-      setTitle('');
-      setContent('');
+      setTitle("");
+      setContent("");
       setMood("😊");
-      setDate(new Date()); // Reset to today
-      navigation.goBack(); // Return to the previous screen
-    } catch (error) {
-      console.error("Error adding diary:", error);
-      Alert.alert("Error", "Failed to add diary.");
+      setDate(new Date());
+      navigation.goBack();
+  } catch (error) {
+    console.error("Error adding diary:", error);
+    Alert.alert("Error", "Failed to add diary.");
     }
   };
 

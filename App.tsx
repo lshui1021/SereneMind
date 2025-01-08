@@ -9,6 +9,7 @@ import DiaryScreen from './src/screen/DiaryScreen';
 import AddDiaryScreen from './src/screen/AddDiaryScreen';
 import EditDiaryScreen from './src/screen/EditDiaryScreen';
 import ViewDiaryScreen from './src/screen/ViewDiaryScreen';
+import PolicyScreen from './src/screen/PolicyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,6 +20,7 @@ const App = () => {
         <Stack.Screen name={"HOME"} component={HomeScreen}/>
         <Stack.Screen name={"LOGIN"} component={LoginScreen}/>
         <Stack.Screen name={"REGISTER"} component={RegisterScreen}/>
+        <Stack.Screen name={"POLICY"} component={PolicyScreen} />
         <Stack.Screen name={"DIARY"} component={DiaryScreen} />
         <Stack.Screen name={"AddDiary"} component={AddDiaryScreen} />
         <Stack.Screen name={"EditDiary"} component={EditDiaryScreen} />

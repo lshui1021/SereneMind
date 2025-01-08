@@ -1,81 +1,100 @@
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View, TextInput, Alert } from 'react-native';
-import { colors } from '../utils/color';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  Alert,
+} from "react-native";
+import { colors } from "../utils/color";
 import { fonts } from '../utils/fonts';
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import { useNavigation } from "@react-navigation/native";
 import auth from "@react-native-firebase/auth";
 
-
 const LoginScreen = () => {
-  const [secureEntery, setSecureEntery] = useState(true);
-
-  const [email, SetEmail] = useState("");
+  const [secureEntry, setSecureEntry] = useState(true);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const loginWithEmailAndPassword = () =>{
-    auth().signInWithEmailAndPassword(email,password)
-    .then((res) => {
-      console.log(res);
-      setTimeout(() => {
-        Alert.alert("Login Successful", "Welcome back to the app!");
-        navigation.navigate("DIARY"); // 導向 DiaryScreen
-      }, 0); // 延遲執行，避免與 Activity 的連接問題
-    })
-    .catch(err => {
-      console.log(err)
-      if (err.code === "auth/invalid-credential") {
-        Alert.alert("Login Error", "The email or password entered incorrectly.")
-      }
-    })
-  };
 
   const navigation = useNavigation();
 
-  const handleGoBack = () => { navigation.navigate("HOME")};
-  const handleRegister = () => { navigation.navigate("REGISTER")};
-  const handleDiary = () => { navigation.navigate("DIARY")};
-  
-  return (
+  const loginWithEmailAndPassword = () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Email and password are required.");
+      return;
+    }
 
+    auth()
+      .signInWithEmailAndPassword(email, password)
+      .then((res) => {
+        console.log("Login Successful:", res);
+        Alert.alert("Login Successful", "Welcome back to the app!");
+        navigation.navigate("DIARY"); // Navigate to Diary screen
+      })
+      .catch((err) => {
+        console.log(err);
+        switch (err.code) {
+          case "auth/invalid-email":
+            Alert.alert("Login Error", "Invalid email format.");
+            break;
+          case "auth/user-not-found":
+            Alert.alert("Login Error", "No user found with this email.");
+            break;
+          case "auth/wrong-password":
+            Alert.alert("Login Error", "Incorrect password.");
+            break;
+          default:
+            Alert.alert("Login Error", "Something went wrong. Please try again.");
+        }
+      });
+  };
+
+  return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButtonWrapper}  onPress ={handleGoBack}>
+      <TouchableOpacity
+        style={styles.backButtonWrapper}
+        onPress={() => navigation.navigate("HOME")}
+      >
         <MaterialIcons
-            name={"keyboard-arrow-left"}
-            color={colors.primary}
-            size={40}
+          name={"keyboard-arrow-left"}
+          color={colors.primary}
+          size={40}
         />
       </TouchableOpacity>
       <View style={styles.textContainer}>
         <Text style={styles.headingText}>Welcome back!</Text>
-        <Text style={styles.headingText}>Glad to see you, Again!</Text>
+        <Text style={styles.headingText}>Glad to see you again!</Text>
       </View>
-     
+
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
-          <MaterialIcons name={"mail-outline"} size={30} color={colors.secondary}/>
-            <TextInput
-              value={email}
-              onChangeText={text => SetEmail(text)}
-              style={styles.textInput}
-              placeholder="Enter your Email"
-              placeholderTextColor={colors.secondary}
-              keyboardType="email-address"/>
+          <MaterialIcons name={"mail-outline"} size={30} color={colors.secondary} />
+          <TextInput
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+            style={styles.textInput}
+            placeholder="Enter your Email"
+            placeholderTextColor={colors.secondary}
+            keyboardType="email-address"
+          />
         </View>
         <View style={styles.inputContainer}>
-          <MaterialIcons name={"lock-outline"} size={30} color={colors.secondary}/>
+          <MaterialIcons name={"lock-outline"} size={30} color={colors.secondary} />
           <TextInput
             value={password}
-            onChangeText={text => setPassword(text)}
+            onChangeText={(text) => setPassword(text)}
             style={styles.textInput}
             placeholder="Enter your password"
             placeholderTextColor={colors.secondary}
-            secureTextEntry={secureEntery}
+            secureTextEntry={secureEntry}
           />
           <TouchableOpacity
             onPress={() => {
-              setSecureEntery((prev) => !prev);
+              setSecureEntry((prev) => !prev);
             }}
           >
             <SimpleLineIcons name={"eye"} size={20} color={colors.secondary} />
@@ -85,31 +104,25 @@ const LoginScreen = () => {
         <TouchableOpacity>
           <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.loginButtonWrapper} onPress={loginWithEmailAndPassword}>
+        <TouchableOpacity
+          style={styles.loginButtonWrapper}
+          onPress={loginWithEmailAndPassword}
+        >
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
-        <Text style={styles.continueText}>or continue with</Text>
-
-        <TouchableOpacity style={styles.googleButtonContainer}>
-          <Image
-            source={require("../assets/google.png")}
-            style={styles.googleImage}
-          />
-          <Text style={styles.googleText}>Google</Text>
-        </TouchableOpacity>
-
         <View style={styles.footerContainer}>
           <Text style={styles.accountText}>Don’t have an account?</Text>
-          <TouchableOpacity onPress={handleRegister}>
-          <Text style={styles.signupText}>Register now</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("REGISTER")}>
+            <Text style={styles.signupText}>Register now</Text>
           </TouchableOpacity>
         </View>
-      </View>  
+      </View>
     </View>
-  )
-}
+  );
+};
 
-export default LoginScreen
+export default LoginScreen;
+
 
 const styles = StyleSheet.create({
     container: {
